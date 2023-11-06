@@ -1,5 +1,7 @@
 import { existsSync, writeFileSync, readFileSync } from 'fs'
 import promptSync from 'prompt-sync'
+import fs from "node:fs"
+
 
 let passedGuesses = ""
 let correctGuesses = ""
@@ -10,10 +12,6 @@ let underScore = "-"
 let guessedword = ""
 let user = ""
 
-
-
-
-
 const prompt = promptSync()
 
 let x = console.log // debug
@@ -22,21 +20,38 @@ class Player {
   constructor(name, score) {
     this.name = name;
     this.score = score;
-    // här ska den spara till en fil
+    this.HSFile = 'highscore.csv'; // Replace with the path to your CSV file
+
+    // Check if the CSV file already exists
+    if (!fs.existsSync(this.HSFile)) {
+      const csvHeader = 'Name,Score\n';
+      fs.writeFileSync(this.HSFile, csvHeader);
+    }
+
+    const csvContent = `${this.name},${this.score}\n`;
+
+    fs.appendFileSync(this.HSFile, csvContent, (err) => {
+      if (err) {
+        console.error('Error writing to CSV file:', err);
+      } else {
+        console.log('Data added to CSV file successfully');
+      }
+    })
   }
 }
 
 
 function getUser() {
-  user = prompt("Please enter your name")
-  if (user == null || user == "") {
+  let user = prompt("Please enter your name");
+  if (!user || user.trim() === "") {
     let anonNum = Math.floor(100 + Math.random() * 900)
     user = "Anonymous" + anonNum
-    x("We assigned you a username: " + user)
+    user = new Player(user, 30)
+    x("We assigned you a username: " + user.name)
+  } else {
+    user = new Player(user, 10);
+    x("Hello " + user.name);
   }
-  user = new Player(user, 0)
-  x("Hello " + user.name)
-  //userScoreUpdate(user.score)
 }
 getUser()
 //
@@ -47,7 +62,7 @@ function getRandomWord() { // RANDOMIZAR ett ord ur en lista av ord
   const lines = readFileSync(wordList, 'utf-8').split('\n')
   const data = lines.slice(1);
   const randomIndex = Math.floor(Math.random() * data.length)
-  const randomRow = data[randomIndex].split(',') // Behövs denna?
+  const randomRow = data[randomIndex].split(',')
   pickedWord = randomRow[0] //'BENJAMIN'
   tempword = pickedWord
   genclue(pickedWord)
