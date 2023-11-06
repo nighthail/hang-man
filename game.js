@@ -1,4 +1,5 @@
-// om dedt inte funkar är det pga package.json filens type modulemupperi
+import { existsSync, writeFileSync, readFileSync } from 'fs'
+import promptSync from 'prompt-sync'
 
 let passedGuesses = ""
 let correctGuesses = ""
@@ -7,13 +8,11 @@ let pickedWord = ""
 let tempword = pickedWord
 let underScore = "-"
 let guessedword = ""
-
-
 let user = ""
 
 
 
-import promptSync from 'prompt-sync'
+
 
 const prompt = promptSync()
 
@@ -44,10 +43,12 @@ getUser()
 getRandomWord()
 
 function getRandomWord() { // RANDOMIZAR ett ord ur en lista av ord
-  //let wordList = hangmanWords
-  //const words = wordList.split(' ')
-  //let NUMB = Math.floor(Math.random() * 7)
-  pickedWord = 'BENJAMIN'//words[NUMB] (Temporary word for debug purposes)
+  const wordList = 'wordlist.csv'
+  const lines = readFileSync(wordList, 'utf-8').split('\n')
+  const data = lines.slice(1);
+  const randomIndex = Math.floor(Math.random() * data.length)
+  const randomRow = data[randomIndex].split(',') // Behövs denna?
+  pickedWord = randomRow[0] //'BENJAMIN'
   tempword = pickedWord
   genclue(pickedWord)
 }
