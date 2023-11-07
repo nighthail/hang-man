@@ -11,9 +11,17 @@ let tempword = pickedWord
 let underScore = "-"
 let guessedword = ""
 let user = ""
+let currentScore = 0
+
+// todo:
+// Skriv poängen till rätt person i higscore-listan
+// visa highscorelistan ?
+// överkurs:
+// Kontrollera om personen redan finns i highscore-listan när den registerar sig
+// Om dess nya highscore är högre, skriv över highscore.
+// Rita ut hänga gubbe figur
 
 const prompt = promptSync()
-
 let x = console.log // debug
 
 class Player {
@@ -63,7 +71,7 @@ function getRandomWord() { // RANDOMIZAR ett ord ur en lista av ord
   const data = lines.slice(1);
   const randomIndex = Math.floor(Math.random() * data.length)
   const randomRow = data[randomIndex].split(',')
-  pickedWord = randomRow[0] //'BENJAMIN'
+  pickedWord = 'BEN' //randomRow[0] 
   tempword = pickedWord
   genclue(pickedWord)
 }
@@ -93,20 +101,7 @@ function compareWords(guessedword) {
   // if som räknar antalet försök
   if (tries > 3) {
     x("You lost :( The word was: " + pickedWord)
-    let playagain = prompt("Play again? y/n")
-    if (playagain == 'y') {
-      passedGuesses = ""
-      correctGuesses = ""
-      tries = 0
-      pickedWord = ""
-      tempword = pickedWord
-      underScore = "-"
-      guessedword = ''
-      getRandomWord()
-    }
-    else {
-      x("Ok i guess...")
-    }
+    playAgain()
 
     //let user = document.getElementById("currentUser").innerText
     //let score = document.getElementById("currentScore").innerText
@@ -121,9 +116,6 @@ function compareWords(guessedword) {
         correctGuesses = correctGuesses + guessedword
         let recuringLetter = pickedWord.split(guessedword).length - 1 // ta fram antalet ggr bokstaven förekommer
 
-        //user.score += 10
-        //userScoreUpdate(user.score)
-
         // For loop som kollar att bokstaven ersätts på ALLA ställen
         for (let index = 0; index < recuringLetter; index++) {
           let placement = tempword.indexOf(guessedword) + 1
@@ -131,18 +123,24 @@ function compareWords(guessedword) {
           let before = underScore.slice(0, placement - 1)
           let after = underScore.slice(placement)
           underScore = before + guessedword + after
+          //kontrollera ordet som finns i terminalen
+          x(underScore)
+        }
+
+        if (underScore == pickedWord) {
+          x("Wow shit dawg")
+          playAgain()
+
+          //userScoreUpdate(user.score)
+          // Om du vinner
+          //      winTracker()
+        }
+        else {
+          newLetterPrompt()
 
         }
 
-        x(underScore)
-        newLetterPrompt()
 
-        //    if (document.getElementById("word").innerText == pickedWord) { // måste kontrollera ordet på annat sätt
-        //user.score += 50
-        //userScoreUpdate(user.score)
-        // Om du vinner
-        //      winTracker()
-        //    }
 
       }
 
@@ -155,19 +153,19 @@ function compareWords(guessedword) {
         tries = tries + 1
         showGuessedWordsFunc(guessedword)
 
-        // document.getElementById("hangmanImage").style.content = "url('img/" + tries + ".png')"
         //console.log(user.score)
         //user.score -= 5
         //userScoreUpdate(user.score)
       }
     }
     else if (guessedword == pickedWord) {
-      x("The guessed letter is: " + pickedWord)
+      x("Congrats, you guessed right: " + pickedWord)
+      currentScore += 50
+      x("your score is:" + currentScore)
+      playAgain()
       //user.score += 100
       //userScoreUpdate(user.score)
 
-      // Om du vinner
-      //winTracker()
 
     }
     else { // BER DIG ANVÄNDA ENBART ETT ORD
@@ -185,3 +183,20 @@ function showGuessedWordsFunc(guessedword) {
   newLetterPrompt()
 }
 
+function playAgain() {
+  let playagain = prompt("Play again? y/n")
+  if (playagain == 'y') {
+    passedGuesses = ""
+    correctGuesses = ""
+    tries = 0
+    pickedWord = ""
+    tempword = pickedWord
+    underScore = "-"
+    guessedword = ''
+    getRandomWord()
+  }
+  else {
+    x("Ok i guess...")
+  }
+
+}
