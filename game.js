@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs'
 import promptSync from 'prompt-sync'
 import fs from "node:fs"
+import { drawMan0, drawMan1, drawMan2, drawMan3, drawMan4 } from './hang-man.js'
 
 let passedGuesses = ""
 let correctGuesses = ""
@@ -92,7 +93,7 @@ function getUser() {
       hsObjects.push(obj)
     }
     if (hsObjects.some(obj => obj.username === currentUser)) {
-
+      x(drawMan0)
       x("Welcome back " + currentUser + "!")
     } else {
       currentUser = user
