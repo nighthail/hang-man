@@ -14,7 +14,6 @@ let currentScore = 0
 let currentUser = ''
 let HSFile = 'highscore.csv'
 // todo:
-// Kontrollera om personen redan finns i highscore-listan när den registerar sig
 // ta fram top 3 i highscoren
 // Rita ut hänga gubbe figur
 
@@ -38,16 +37,16 @@ class Player {
 
     fs.appendFileSync(this.HSFile, csvContent, (err) => {
       if (err) {
-        console.error('Error writing to CSV file:', err);
+        console.error('Error writing to highscore file:', err);
       } else {
-        console.log('Data added to CSV file successfully');
+        console.log('Data added to highscore file successfully');
       }
     })
   }
 }
 
-function recurringPlayer() {
-  // funktion för om spelarens namn fanns i listan
+function topThreeHS() {
+
 
 }
 
@@ -58,7 +57,6 @@ function getUser() {
     getUser()
   } else {
     currentUser = user
-    // Något som kollar om en highscore lista finns eller inte
 
     // Check if the CSV file already exists
     if (!fs.existsSync(HSFile)) {
@@ -131,7 +129,7 @@ function newLetterPrompt() {
 
 function compareWords(guessedword) {
   // if som räknar antalet försök
-  if (tries > 3) {
+  if (tries > 4) {
     x("You lost :( The word was: " + pickedWord)
     playAgain()
     // lägg in att du hamnar i highscoren här och resetta currentScore
@@ -140,13 +138,16 @@ function compareWords(guessedword) {
   else {
     if (guessedword.length == 1) {// ser till att det bara finns en bokstav
 
+      if (passedGuesses.includes(guessedword)) { // Om du upprepar samma bokstav
+        x("You need to pick a new letter")
+        newLetterPrompt()
+      }
+
       if (pickedWord.includes(guessedword) && !correctGuesses.includes(guessedword)) { // Kollar att gissningen är rätt och inte upprepad
         correctGuesses = correctGuesses + guessedword
         let recuringLetter = pickedWord.split(guessedword).length - 1 // ta fram antalet ggr bokstaven förekommer
 
         currentScore += 10
-
-
 
         // For loop som kollar att bokstaven ersätts på ALLA ställen
         for (let index = 0; index < recuringLetter; index++) {
@@ -155,32 +156,26 @@ function compareWords(guessedword) {
           let before = underScore.slice(0, placement - 1)
           let after = underScore.slice(placement)
           underScore = before + guessedword + after
-          //kontrollera ordet som finns i terminalen
           x(underScore)
         }
 
-        if (underScore == pickedWord) {
+        //kontrollera ordet som finns i terminalen
+        if (underScore == pickedWord) { // här har jag en bugg
           x("Congrats, you guessed right: " + pickedWord)
           currentScore += 50
-          x("your score is:" + currentScore)
+          x("Your score is:" + currentScore)
           playAgain()
-
-          //userScoreUpdate(user.score)
-          // Om du vinner
-          //      winTracker()
         }
         else {
           newLetterPrompt()
         }
       }
-      if (passedGuesses.includes(guessedword)) { // Om du upprepar samma bokstav
-        x("You need to pick a new letter")
-        newLetterPrompt()
-      }
       else {
         tries = tries + 1
         showGuessedWordsFunc(guessedword)
       }
+
+
     }
     else if (guessedword == pickedWord) {
       x("Congrats, you guessed right: " + pickedWord)
@@ -188,8 +183,8 @@ function compareWords(guessedword) {
       x("your score is:" + currentScore)
       playAgain()
 
-
     }
+
     else { // BER DIG ANVÄNDA ENBART ETT ORD
       x("Only one letter allowed at a time!")
       newLetterPrompt()
@@ -220,8 +215,17 @@ function playAgain() {
   }
   else {
     x("Ok i guess...")
+    passedGuesses = ""
+    correctGuesses = ""
+    tries = 0
+    pickedWord = ""
+    tempword = pickedWord
+    underScore = "-"
+    guessedword = ''
+
     AddToHighscore()
     // Lägg till hiscoren och resetta current score
+
   }
 }
 
@@ -274,11 +278,8 @@ function AddToHighscore() {
     // Write the CSV string back to the file
     fs.writeFileSync(filePath, csvString, 'utf8');
     console.log('We updated the highscore.')
-  } else {
-    x("You didnt break you previous record")
-    return
+  } else if (lastScore >= currentScore) {
+    x("You didn't break you previous record")
   }
   currentScore = 0
-
-
 }
