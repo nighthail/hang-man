@@ -13,12 +13,9 @@ let user = ""
 let currentScore = 0
 let currentUser = ''
 let HSFile = 'highscore.csv'
-// todo:
-// ta fram top 3 i highscoren
-// Rita ut hänga gubbe figur
 
 const prompt = promptSync()
-let x = console.log // debug
+let x = console.log
 
 class Player {
   constructor(name, score) {
@@ -32,7 +29,6 @@ class Player {
       fs.writeFileSync(this.HSFile, csvHeader);
     }
 
-    // const csvContent = `${this.name},${this.score}\n`;
     const csvContent = `\n${this.name},${this.score}`
 
     fs.appendFileSync(this.HSFile, csvContent, (err) => {
@@ -45,8 +41,29 @@ class Player {
   }
 }
 
-function topThreeHS() {
+function topOneHS() {
+  const csvData = fs.readFileSync(HSFile, 'utf8');
+  const rows = csvData.split('\n').map(row => row.trim());
+  const columns = rows[0].split(',')
 
+  // Create an array to store the highscoreObjects
+  const highscoreObjects = []
+
+  // Iterate through the rows and create highscoreObjects
+  for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+    const rowValues = rows[i].split(',')
+    const obj = {}
+
+    for (let j = 0; j < columns.length; j++) {
+      obj[columns[j]] = rowValues[j]
+    }
+    highscoreObjects.push(obj)
+  }
+  const highest = highscoreObjects.reduce((previous, current) => {
+    return current.score > previous.score ? current : previous;
+  })
+
+  x('Highest Score: ' + highest.username + ": " + highest.score + "p")
 
 }
 
@@ -93,7 +110,7 @@ function getUser() {
     }
   }
 } getUser()
-//
+topOneHS()
 getRandomWord()
 
 function getRandomWord() { // RANDOMIZAR ett ord ur en lista av ord
@@ -106,7 +123,6 @@ function getRandomWord() { // RANDOMIZAR ett ord ur en lista av ord
   tempword = pickedWord
   genclue(pickedWord)
 }
-
 
 function genclue() {
   for (let index = 1; index < pickedWord.length; index++) { // genererar ledtråd
