@@ -33,11 +33,6 @@ class Player {
     const csvContent = `\n${this.name},${this.score}`
 
     fs.appendFileSync(this.File, csvContent, (err) => {
-      if (err) {
-        console.error('Error writing to highscore file:', err);
-      } else {
-        console.log('Data added to highscore file successfully');
-      }
     })
   }
 }
@@ -60,7 +55,7 @@ function topOneHS() {
   }
   const personAtIndex1 = topOneHS[0]
 
-  x('Highest Score: ' + personAtIndex1.username + ": " + personAtIndex1.score + "p") // bugg igen
+  x('Highest Score: ' + personAtIndex1.username + ": " + personAtIndex1.score + "p")
   topOneHS = []
 }
 
@@ -93,7 +88,6 @@ function getUser() {
       hsObjects.push(obj)
     }
     if (hsObjects.some(obj => obj.username === currentUser)) {
-      x(drawMan0)
       x("Welcome back " + currentUser + "!")
     } else {
       currentUser = user
@@ -112,7 +106,7 @@ function getRandomWord() {
   const data = lines.slice(1);
   const randomIndex = Math.floor(Math.random() * data.length)
   const randomRow = data[randomIndex].split(',')
-  pickedWord = 'BEN' //randomRow[0] 
+  pickedWord = randomRow[0]
   tempword = pickedWord
   genclue(pickedWord)
 }
@@ -137,8 +131,9 @@ function newLetterPrompt() {
 
 
 function compareWords(guessedword) {
-  if (tries > 4) {
+  if (tries > 3) {
     x("You lost :( The word was: " + pickedWord)
+    x(drawMan4)
     playAgain()
 
   }
@@ -165,6 +160,7 @@ function compareWords(guessedword) {
           x(underScore)
         }
 
+
         if (underScore == pickedWord) {
           x("Congrats, you guessed right: " + pickedWord)
           currentScore += 50
@@ -176,8 +172,36 @@ function compareWords(guessedword) {
         }
       }
       else {
-        tries = tries + 1
-        showGuessedWordsFunc(guessedword)
+        switch (tries) {
+          case 0:
+            x(drawMan0)
+            tries = tries + 1
+            showGuessedWordsFunc(guessedword)
+            break;
+          case 1:
+            x(drawMan1)
+            tries = tries + 1
+            showGuessedWordsFunc(guessedword)
+            break;
+          case 2:
+            x(drawMan2)
+            tries = tries + 1
+            showGuessedWordsFunc(guessedword)
+            break;
+          case 3:
+            x(drawMan3)
+            tries = tries + 1
+            showGuessedWordsFunc(guessedword)
+            break;
+          case 4:
+            x(drawMan4)
+            tries = tries + 1
+            showGuessedWordsFunc(guessedword)
+            break;
+
+          default:
+            break;
+        }
       }
 
 
@@ -207,25 +231,12 @@ function showGuessedWordsFunc(guessedword) {
 function playAgain() {
   let playagain = prompt("Play again? y/n")
   if (playagain == 'y') {
-    passedGuesses = ""
-    correctGuesses = ""
-    tries = 0
-    pickedWord = ""
-    tempword = pickedWord
-    underScore = "-"
-    guessedword = ''
+    reset()
     getRandomWord()
   }
   else {
     x("Ok i guess...")
-    passedGuesses = ""
-    correctGuesses = ""
-    tries = 0
-    pickedWord = ""
-    tempword = pickedWord
-    underScore = "-"
-    guessedword = ''
-
+    reset()
     AddToHighscore()
 
   }
@@ -271,4 +282,14 @@ function AddToHighscore() {
     x("You didn't break you previous record")
   }
   currentScore = 0
+}
+
+function reset() {
+  passedGuesses = ""
+  correctGuesses = ""
+  tries = 0
+  pickedWord = ""
+  tempword = pickedWord
+  underScore = "-"
+  guessedword = ''
 }
