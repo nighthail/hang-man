@@ -12,10 +12,10 @@ let guessedword = ""
 let user = ""
 let currentScore = 0
 let currentUser = ''
+let HSFile = 'highscore.csv'
 // todo:
-// visa highscorelistan ?
-// överkurs:
 // Kontrollera om personen redan finns i highscore-listan när den registerar sig
+// ta fram top 3 i highscoren
 // Rita ut hänga gubbe figur
 
 const prompt = promptSync()
@@ -46,23 +46,55 @@ class Player {
   }
 }
 
+function recurringPlayer() {
+  // funktion för om spelarens namn fanns i listan
+
+}
 
 function getUser() {
   let user = prompt("Please enter your name");
   if (!user || user.trim() === "") {
-    let anonNum = Math.floor(100 + Math.random() * 900)
-    user = "Anonymous" + anonNum
-    currentUser = user
-    user = new Player(user, 0)
-    x("We assigned you a username: " + user.name)
+    x("You have to enter a username!")
+    getUser()
   } else {
     currentUser = user
-    user = new Player(user, 0)
-    x("Hello " + user.name)
+    // Något som kollar om en highscore lista finns eller inte
 
+    // Check if the CSV file already exists
+    if (!fs.existsSync(HSFile)) {
+      const csvHeader = 'Name,Score\n';
+      fs.writeFileSync(this.HSFile, csvHeader);
+    }
+    const userToFind = currentUser
+    const csvData = fs.readFileSync(HSFile, 'utf8');
+
+    const rows = csvData.split('\n').map(row => row.trim());
+    const columns = rows[0].split(',')
+
+    // Create an array to store the highscoreObjects
+    const highscoreObjects = []
+
+    // Iterate through the rows and create highscoreObjects
+    for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+      const rowValues = rows[i].split(',')
+      const obj = {}
+
+      for (let j = 0; j < columns.length; j++) {
+        obj[columns[j]] = rowValues[j]
+      }
+      highscoreObjects.push(obj)
+    }
+    if (highscoreObjects.some(obj => obj.username === currentUser)) {
+
+      x("Welcome back " + currentUser + "!")
+    } else {
+      currentUser = user
+      user = new Player(user, 0)
+      x("Hello " + user.name)
+
+    }
   }
-}
-getUser()
+} getUser()
 //
 getRandomWord()
 
@@ -139,22 +171,15 @@ function compareWords(guessedword) {
         }
         else {
           newLetterPrompt()
-
         }
-
-
-
       }
-
       if (passedGuesses.includes(guessedword)) { // Om du upprepar samma bokstav
         x("You need to pick a new letter")
         newLetterPrompt()
       }
-
       else {
         tries = tries + 1
         showGuessedWordsFunc(guessedword)
-
       }
     }
     else if (guessedword == pickedWord) {
@@ -189,6 +214,8 @@ function playAgain() {
     tempword = pickedWord
     underScore = "-"
     guessedword = ''
+
+    // Visa highscore listans top 3
     getRandomWord()
   }
   else {
@@ -216,11 +243,8 @@ function AddToHighscore() {
 
     for (let j = 0; j < columns.length; j++) {
       obj[columns[j]] = rowValues[j]
-      x(obj)
     }
-
     highscoreObjects.push(obj)
-
   }
 
   //hitta usernamnet i arrayen av objekt, för att sedan ersätta objektet
@@ -254,53 +278,7 @@ function AddToHighscore() {
     x("You didnt break you previous record")
     return
   }
-
-
-
-
-
-
-
-
-
   currentScore = 0
+
+
 }
-
-
-
-/*
-
-  // Read the CSV file into a string
-  const filePath = 'highscore.csv';
-  const csvData = fs.readFileSync(filePath, 'utf8');
-
-  // Split the CSV data into rows and columns
-  const rows = csvData.split('\n').map(row => row.trim());
-  const columns = rows[0].split(',');
-
-  // Find and replace the specific value in the CSV data
-  const searchValue = 'Damien';
-  const replaceValue = 'Damien but Cool';
-
-  for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
-    const rowValues = rows[i].split(',');
-
-    for (let j = 0; j < columns.length; j++) {
-      if (rowValues[j] === searchValue) {
-        rowValues[j] = replaceValue;
-      }
-    }
-
-    rows[i] = rowValues.join(',');
-  }
-
-  // Join the rows back into a CSV string
-  const updatedCsvData = rows.join('\n');
-
-  // Write the updated CSV data back to the file
-  fs.writeFileSync(filePath, updatedCsvData, 'utf8');
-
-  console.log('CSV file updated.');
-
-
-*/
