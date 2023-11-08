@@ -1,4 +1,4 @@
-import { existsSync, writeFileSync, readFileSync } from 'fs'
+import { readFileSync } from 'fs'
 import promptSync from 'prompt-sync'
 import fs from "node:fs"
 
@@ -14,6 +14,7 @@ let currentScore = 0
 let currentUser = ''
 let HSFile = 'highscore.csv'
 
+
 const prompt = promptSync()
 let x = console.log
 
@@ -21,17 +22,16 @@ class Player {
   constructor(name, score) {
     this.name = name;
     this.score = score;
-    this.HSFile = 'highscore.csv'; // Replace with the path to your CSV file
+    this.File = 'highscore.csv'
 
-    // Check if the CSV file already exists
-    if (!fs.existsSync(this.HSFile)) {
+    if (!fs.existsSync(this.File)) {
       const csvHeader = 'Name,Score\n';
       fs.writeFileSync(this.HSFile, csvHeader);
     }
 
     const csvContent = `\n${this.name},${this.score}`
 
-    fs.appendFileSync(this.HSFile, csvContent, (err) => {
+    fs.appendFileSync(this.File, csvContent, (err) => {
       if (err) {
         console.error('Error writing to highscore file:', err);
       } else {
@@ -42,29 +42,25 @@ class Player {
 }
 
 function topOneHS() {
+
   const csvData = fs.readFileSync(HSFile, 'utf8');
   const rows = csvData.split('\n').map(row => row.trim());
   const columns = rows[0].split(',')
 
-  // Create an array to store the highscoreObjects
-  const highscoreObjects = []
-
-  // Iterate through the rows and create highscoreObjects
-  for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+  let topOneHS = []
+  for (let i = 1; i < rows.length; i++) {
     const rowValues = rows[i].split(',')
-    const obj = {}
+    const person = {}
 
     for (let j = 0; j < columns.length; j++) {
-      obj[columns[j]] = rowValues[j]
+      person[columns[j]] = rowValues[j]
     }
-    highscoreObjects.push(obj)
+    topOneHS.push(person)
   }
-  const highest = highscoreObjects.reduce((previous, current) => {
-    return current.score > previous.score ? current : previous;
-  })
+  const personAtIndex1 = topOneHS[0]
 
-  x('Highest Score: ' + highest.username + ": " + highest.score + "p")
-
+  x('Highest Score: ' + personAtIndex1.username + ": " + personAtIndex1.score + "p") // bugg igen
+  topOneHS = []
 }
 
 function getUser() {
@@ -75,7 +71,6 @@ function getUser() {
   } else {
     currentUser = user
 
-    // Check if the CSV file already exists
     if (!fs.existsSync(HSFile)) {
       const csvHeader = 'Name,Score\n';
       fs.writeFileSync(this.HSFile, csvHeader);
@@ -85,21 +80,18 @@ function getUser() {
 
     const rows = csvData.split('\n').map(row => row.trim());
     const columns = rows[0].split(',')
+    const hsObjects = []
 
-    // Create an array to store the highscoreObjects
-    const highscoreObjects = []
-
-    // Iterate through the rows and create highscoreObjects
-    for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+    for (let i = 1; i < rows.length; i++) {
       const rowValues = rows[i].split(',')
       const obj = {}
 
       for (let j = 0; j < columns.length; j++) {
         obj[columns[j]] = rowValues[j]
       }
-      highscoreObjects.push(obj)
+      hsObjects.push(obj)
     }
-    if (highscoreObjects.some(obj => obj.username === currentUser)) {
+    if (hsObjects.some(obj => obj.username === currentUser)) {
 
       x("Welcome back " + currentUser + "!")
     } else {
@@ -113,7 +105,7 @@ function getUser() {
 topOneHS()
 getRandomWord()
 
-function getRandomWord() { // RANDOMIZAR ett ord ur en lista av ord
+function getRandomWord() {
   const wordList = 'wordlist.csv'
   const lines = readFileSync(wordList, 'utf-8').split('\n')
   const data = lines.slice(1);
@@ -125,7 +117,7 @@ function getRandomWord() { // RANDOMIZAR ett ord ur en lista av ord
 }
 
 function genclue() {
-  for (let index = 1; index < pickedWord.length; index++) { // genererar ledtråd
+  for (let index = 1; index < pickedWord.length; index++) {
     underScore += "-"
   }
   x(underScore)
@@ -144,28 +136,25 @@ function newLetterPrompt() {
 
 
 function compareWords(guessedword) {
-  // if som räknar antalet försök
   if (tries > 4) {
     x("You lost :( The word was: " + pickedWord)
     playAgain()
-    // lägg in att du hamnar i highscoren här och resetta currentScore
 
   }
   else {
-    if (guessedword.length == 1) {// ser till att det bara finns en bokstav
+    if (guessedword.length == 1) {
 
-      if (passedGuesses.includes(guessedword)) { // Om du upprepar samma bokstav
+      if (passedGuesses.includes(guessedword)) {
         x("You need to pick a new letter")
         newLetterPrompt()
       }
 
-      if (pickedWord.includes(guessedword) && !correctGuesses.includes(guessedword)) { // Kollar att gissningen är rätt och inte upprepad
+      if (pickedWord.includes(guessedword) && !correctGuesses.includes(guessedword)) {
         correctGuesses = correctGuesses + guessedword
-        let recuringLetter = pickedWord.split(guessedword).length - 1 // ta fram antalet ggr bokstaven förekommer
+        let recuringLetter = pickedWord.split(guessedword).length - 1
 
         currentScore += 10
 
-        // For loop som kollar att bokstaven ersätts på ALLA ställen
         for (let index = 0; index < recuringLetter; index++) {
           let placement = tempword.indexOf(guessedword) + 1
           tempword = pickedWord.replace(guessedword, " ")
@@ -175,8 +164,7 @@ function compareWords(guessedword) {
           x(underScore)
         }
 
-        //kontrollera ordet som finns i terminalen
-        if (underScore == pickedWord) { // här har jag en bugg
+        if (underScore == pickedWord) {
           x("Congrats, you guessed right: " + pickedWord)
           currentScore += 50
           x("Your score is:" + currentScore)
@@ -201,7 +189,7 @@ function compareWords(guessedword) {
 
     }
 
-    else { // BER DIG ANVÄNDA ENBART ETT ORD
+    else {
       x("Only one letter allowed at a time!")
       newLetterPrompt()
     }
@@ -225,8 +213,6 @@ function playAgain() {
     tempword = pickedWord
     underScore = "-"
     guessedword = ''
-
-    // Visa highscore listans top 3
     getRandomWord()
   }
   else {
@@ -240,7 +226,6 @@ function playAgain() {
     guessedword = ''
 
     AddToHighscore()
-    // Lägg till hiscoren och resetta current score
 
   }
 }
@@ -253,11 +238,9 @@ function AddToHighscore() {
   const rows = csvData.split('\n').map(row => row.trim());
   const columns = rows[0].split(',')
 
-  // Create an array to store the highscoreObjects
-  const highscoreObjects = []
+  let highscoreObjects = []
 
-  // Iterate through the rows and create highscoreObjects
-  for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
+  for (let i = 1; i < rows.length; i++) {
     const rowValues = rows[i].split(',')
     const obj = {}
 
@@ -266,35 +249,24 @@ function AddToHighscore() {
     }
     highscoreObjects.push(obj)
   }
+  let placement = highscoreObjects.findIndex(x => x.username === currentUser)
+  let obj = highscoreObjects.find(o => o.username === currentUser)
 
-  //hitta usernamnet i arrayen av objekt, för att sedan ersätta objektet
-  let placement = highscoreObjects.findIndex(x => x.username === userToFind)
-  const lastScore = ''
-
-  for (const obj of highscoreObjects) {
-    if (obj.hasOwnProperty(userToFind)) {
-      lastScore = obj[userToFind]
-    }
-  }
-
-
-  if (lastScore < currentScore) {
+  if (obj.score < currentScore) {
     x("You broke your previous record!")
-    highscoreObjects[placement] = { username: currentUser, score: currentScore } // ersätter förra rekordet
+    highscoreObjects[placement] = { username: currentUser, score: currentScore }
 
-    // Create a header row from the keys of the first object
-    const header = Object.keys(highscoreObjects[0]).join(',')
+    let sortedHighscore = highscoreObjects.slice().sort((a, b) => b.score - a.score);
 
-    // Create an array of data rows
-    const dataRows = highscoreObjects.map(obj => Object.values(obj).join(','))
-
-    // Combine the header and data rows into a CSV string
+    const header = Object.keys(sortedHighscore[0]).join(',')
+    const dataRows = sortedHighscore.map(obj => Object.values(obj).join(','))
     const csvString = [header, ...dataRows].join('\n')
 
-    // Write the CSV string back to the file
     fs.writeFileSync(filePath, csvString, 'utf8');
-    console.log('We updated the highscore.')
-  } else if (lastScore >= currentScore) {
+    x('We updated the highscore.')
+    highscoreObjects = []
+    sortedHighscore = []
+  } else {
     x("You didn't break you previous record")
   }
   currentScore = 0
